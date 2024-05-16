@@ -34,15 +34,15 @@
         <input type="number" id="restaurant-id" name="restaurant-id"><br><br>
         <button type="submit">Add Dish</button>
     </form>
-
-    <h1>Registration</h1>
-    <form id="add-customer-form">
-        <label for="user_address">Mail Address:</label><br>
-        <input type="text" id="user_address" name="user_address"><br>
+    <h1>Register</h1>
+    <form id="register-form">
+        <label for="mailaddress">Mail Address:</label><br>
+        <input type="email" id="mailaddress" name="mailaddress" required><br>
         <label for="password">Password:</label><br>
-        <input type="text" id="password" name="password"><br><br>
+        <input type="password" id="register-password" name="password" required><br><br>
         <button type="submit">Register</button>
     </form>
+    <div id="register-message"></div>
 
     <script>
         const token = localStorage.getItem('token');
@@ -140,36 +140,33 @@
                 console.error('Error adding dish:', error);
             });
         });
-        document.getElementById("add-customer-form").addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            const mailAddress = document.getElementById('mail-address').value;
-            const password = document.getElementById('password').value;
-            
-            fetch('http://127.0.0.1:3000/user_registration', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token 
-                },
-                body: JSON.stringify({ 
-                    adress: mailAddress, 
-                    password: password, 
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Registrating customer failed');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data.message);
-            })
-            .catch(error => {
-                console.error('Error registrating customer:', error);
-            });
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const mailaddress = document.getElementById('mailaddress').value;
+        const password = document.getElementById('register-password').value;
+        
+        fetch('http://127.0.0.1:3000/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ mailaddress: mailaddress, password: password })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Registration failed');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('register-message').textContent = 'Registration successful. You can now login.';
+        })
+        .catch(error => {
+            document.getElementById('register-message').textContent = 'Registration failed. Please try again.';
+            console.error('Registration error:', error);
         });
+    });
     </script>
 </body>
 </html>

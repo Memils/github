@@ -79,12 +79,11 @@ users = [
     ('eier2', 'passord2', 2),
     ('eier3', 'passord3', 3)
 ]
-cursor.executemany('INSERT INTO Users (username, password, restaurant_id) VALUES (?, ?, ?)', users)
-conn.commit
-customers = [
-    ('placeholder@gmail.com', 'placeholder'),
-]
-cursor.executemany('INSERT INTO Customers (mailaddress, password) VALUES (?, ?)', customers)
 
+customers = [
+    ('placeholder@gmail.com', 'placeholder')
+]
+cursor.executemany('INSERT INTO Users (username, password, restaurant_id) VALUES (?, ?, ?)', users)
+cursor.executemany('INSERT INTO Customers (mailaddress, password) VALUES (?, ?)', customers)
 conn.commit()
 conn.close()
