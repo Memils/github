@@ -34,16 +34,20 @@
         <input type="number" id="restaurant-id" name="restaurant-id"><br><br>
         <button type="submit">Add Dish</button>
     </form>
+
     <h1>Registration</h1>
     <form id="add-customer-form">
-        <label for-"user_address">Mail Adress:</label><br>
-        <input type="text" 
+        <label for="user_address">Mail Address:</label><br>
+        <input type="text" id="user_address" name="user_address"><br>
+        <label for="password">Password:</label><br>
+        <input type="text" id="password" name="password"><br><br>
+        <button type="submit">Register</button>
     </form>
 
     <script>
         const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'index.html'; 
+        if (!token) { 
+            print("there is no token!")
         }
 
         fetch('http://127.0.0.1:3000/Restaurant')
@@ -134,6 +138,36 @@
             })
             .catch(error => {
                 console.error('Error adding dish:', error);
+            });
+        });
+        document.getElementById("add-customer-form").addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const mailAddress = document.getElementById('mail-address').value;
+            const password = document.getElementById('password').value;
+            
+            fetch('http://127.0.0.1:3000/user_registration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token 
+                },
+                body: JSON.stringify({ 
+                    adress: mailAddress, 
+                    password: password, 
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Registrating customer failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.message);
+            })
+            .catch(error => {
+                console.error('Error registrating customer:', error);
             });
         });
     </script>

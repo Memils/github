@@ -89,19 +89,21 @@ def add_dish(current_user):
         db.commit()
 
     return jsonify({'message': 'Dish added successfully'}), 200
+
 @app.route('/user-registration', methods=['POST'])
 @token_required
 def add_user(current_user):
     data = request.json
-    user_address = data.get('mailaddress')
+    print("Received data:", data)
+    mail_address = data.get('mailaddress')
     password = data.get('password')
 
-    if not user_address or not password:
+    if not mail_address or not password:
         return jsonify({'message': 'All fields are required'}), 400
 
     with sqlite3.connect('./restaurant_menus.db', check_same_thread=False) as db:
         cursor = db.cursor()
-        cursor.execute('INSERT INTO Customers (mailaddres, password) VALUES (?, ?)', (user_address, password))
+        cursor.execute('INSERT INTO Customers (mailaddress, password) VALUES (?, ?)', (mail_address, password))
         db.commit()
 
     return jsonify({'message': 'Succesfully registered new user'}), 200
