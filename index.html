@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Restaurants</h1>
+    <ul id="restaurants-list"></ul>
+
+    <h2>Dishes</h2>
+    <ul id="dishes-list"></ul>
+
+    <h1>Login</h1>
+    <form id="login-form">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username"><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password"><br><br>
+        <button type="submit">Login</button>
+    </form>
+    <div id="message"></div>
+
+    <h1>Add Dish</h1>
+    <form id="add-dish-form">
+        <label for="dish-name">Dish Name:</label><br>
+        <input type="text" id="dish-name" name="dish-name"><br>
+        <label for="dish-description">Description:</label><br>
+        <input type="text" id="dish-description" name="dish-description"><br>
+        <label for="dish-price">Price:</label><br>
+        <input type="number" id="dish-price" name="dish-price" step="0.01"><br>
+        <label for="restaurant-id">Restaurant ID:</label><br>
+        <input type="number" id="restaurant-id" name="restaurant-id"><br><br>
+        <button type="submit">Add Dish</button>
+    </form>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'index.html'; 
+        }
+
+        fetch('http://127.0.0.1:3000/Restaurant')
+        .then(response => response.json())
+        .then(restaurants => {
+            const restaurantsList = document.getElementById('restaurants-list');
+            restaurants.forEach(restaurant => {
+                const li = document.createElement('li');
+                li.textContent = restaurant[1]; 
+                li.addEventListener('click', () => {
+                    fetch(`http://127.0.0.1:3000/Dish/${restaurant[0]}`)
+                    .then(response => response.json())
+                    .then(dishes => {
+                        const dishesList = document.getElementById('dishes-list');
+                        dishesList.innerHTML = '';
+                        dishes.forEach(dish => {
+                            const dishLi = document.createElement('li');
+                            dishLi.textContent = `${dish[1]} - ${dish[2]} - $${dish[3]}`;
+                            dishesList.appendChild(dishLi);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching dishes:', error));
+                });
+                restaurantsList.appendChild(li);
+            });
+        })
+        .catch(error => console.error('Error fetching restaurants:', error));
+
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            fetch('http://127.0.0.1:3000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username, password: password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const token = data.token;
+                localStorage.setItem('token', token);
+                window.location.href = 'index.html'; 
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = 'Login failed. Please check your username and password.';
+                console.error('Login error:', error);
+            });
+        });
+
+        document.getElementById('add-dish-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const dishName = document.getElementById('dish-name').value;
+            const description = document.getElementById('dish-description').value;
+            const price = document.getElementById('dish-price').value;
+            const restaurantId = document.getElementById('restaurant-id').value;
+            
+            fetch('http://127.0.0.1:3000/add_dish', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token 
+                },
+                body: JSON.stringify({ 
+                    name: dishName, 
+                    description: description, 
+                    price: price, 
+                    restaurant_id: restaurantId 
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Adding dish failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.message);
+            })
+            .catch(error => {
+                console.error('Error adding dish:', error);
+            });
+        });
+    </script>
+</body>
+</html>
