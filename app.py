@@ -99,22 +99,24 @@ def options_register():
     response.headers.add('Allowed', 'POST')
     return response
 
-
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
-    data = request.json
-    mailaddress = data.get('mailaddress')
-    password = data.get('password')
+    try:
+        data = request.json
+        mailaddress = data.get('mailaddress')
+        password = data.get('password')
 
-    if not mailaddress or not password:
-        return jsonify({'message': 'Mail address and password are required'}), 400
+        if not mailaddress or not password:
+            return jsonify({'message': 'Mail address and password are required'}), 400
 
-    with sqlite3.connect('./restaurant_menus.db', check_same_thread=False) as db:
-        cursor = db.cursor()
-        cursor.execute('INSERT INTO Customers (mailaddress, password) VALUES (?, ?)', (mailaddress, password))
-        db.commit()
+        with sqlite3.connect('./restaurant_menus.db', check_same_thread=False) as db:
+            cursor = db.cursor()
+            cursor.execute('INSERT INTO Customers (mailaddress, password) VALUES (?, ?)', (mailaddress, password))
+            db.commit()
 
-    return jsonify({'message': 'Customer added successfully'}), 200
+        return jsonify({'message': 'Customer added successfully'}), 200
+    except Exception as e:
+        return jsonify({'message': 'An error occurred', 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=port)
