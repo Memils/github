@@ -90,6 +90,16 @@ def add_dish(current_user):
 
     return jsonify({'message': 'Dish added successfully'}), 200
 
+@app.route('/register', methods=['OPTIONS'])
+def options_register():
+    response = jsonify({'message': 'CORS request allowed.'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Methods', 'POST')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Allowed', 'POST')
+    return response
+
+
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     data = request.json
