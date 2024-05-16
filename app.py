@@ -51,25 +51,28 @@ def login():
     username = data.get('username')
     password = data.get('password')
 
-    print("Received username:", username)
-    print("Received password:", password)
-
     if not username or not password:
         return jsonify({'message': 'Username and password are required'}), 400
-
+    
     with sqlite3.connect('./restaurant_menus.db', check_same_thread=False) as db:
         cursor = db.cursor()
         cursor.execute('SELECT * FROM Users WHERE username=? AND password=?', (username, password))
         user = cursor.fetchone()
 
-    print("User data:", user)
+    if user:
+        token = jwt.encode({'username': username}, app.config['SECRET_KEY'], algorithm="HS256")
+        return jsonify({'token': token}), 200
+    
+    with sqlite3.connect('./restaurant_menus.db', check_same_thread=False) as db:
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM Customers WHERE mailaddress=? AND password=?', (username, password))
+        customer = cursor.fetchone()
 
-    if not user:
-        return jsonify({'message': 'Invalid username or password'}), 401
+    if customer:
+        token = jwt.encode({'mailaddress': username}, app.config['SECRET_KEY'], algorithm="HS256")
+        return jsonify({'token': token}), 200
 
-    token = jwt.encode({'username': username}, app.config['SECRET_KEY'], algorithm="HS256")
-
-    return jsonify({'token': token}), 200
+    return jsonify({'message': 'Invalid username or password'}), 401
 
 @app.route('/add_dish', methods=['POST'])
 @token_required
